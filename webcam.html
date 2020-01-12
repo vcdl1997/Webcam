@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+	<title>Webcam</title>
+</head>
+<body>
+
+	<center>
+
+		<!-- Transmitir vídeo via webcam -->
+		<div class='video-wrap'>
+			<video id='video' playsinline autoplay></video>
+		</div>
+
+
+		<!-- Funções de ligar, capturar e desligar webcam -->
+		<div class='controller'>
+			<button id='ligar' onclick="ligar();">Ligar</button>
+			<button id='capturar'>Capturar</button>
+			<button id='desligar' onclick="desligar();">Desligar</button>
+		</div>
+
+		<canvas id='canvas' style="display: none;"></canvas>
+		 <img id='imagem_capturada' src="" style="display: none; border-radius: 50%;" width="200" height="200">
+	</center>
+
+
+
+	<script>
+		const video = document.getElementById('video');
+		const canvas = document.getElementById('canvas');
+		const capturar = document.getElementById('capturar');
+		const img_capturada = document.getElementById('imagem_capturada');
+		const errorMsgElement = document.getElementById('spanErrorMsg');
+
+		const constraints = {
+			audio: false,
+			video: {
+				width:800, height:540
+			}
+		};
+
+
+		//Acessa a Webcam
+		async function ligar(){
+
+			//verifico se minha div 'video' está 'none', se estiver, exibo ela.
+			if(video.style.display === "none"){
+    			video.style.display = "block";
+  			}
+
+			try{
+				const stream = await navigator.mediaDevices.getUserMedia(constraints);
+				handleSuccess(stream);
+			}catch(e){
+				errorMsgElement.innerHTML = `navigator.getUserMedia.error:${e.toString()}`;
+			}
+		}
+
+
+		//Caso tenha successo ele ativa a camera.
+		function handleSuccess(stream){
+			window.stream = stream;
+			video.srcObject = stream; //Conecta a câmera a um elemento de vídeo ou áudio.
+		}
+
+
+
+		//Desliga a Webcam e dá um hide na div 'video'.
+		function desligar(){
+			stream.getTracks().forEach(function(track) {
+				track.stop();
+			});
+			video.setAttribute("style", "display: none;");
+		}
+
+
+
+		//Faz a captura da imagem, exibe na tela e baixa o arquivo.
+		capturar.addEventListener('click', function(){
+			video.pause();
+
+			let context = canvas.getContext('2d'); //método da API do Canvas 2D fornece maneiras diferentes de desenhar uma imagem na tela.
+			canvas.width = constraints.video.width;
+			canvas.height = constraints.video.height;
+			context.drawImage(video, 0, 0, canvas.width, canvas.height); 
+			//drawImage(image, x, y, width, height) ou drawImage ( imagem , dx , dy , dWidth , dHeight );
+
+			let foto = canvas.toDataURL(); //pega o elemento canvas que foi criado acima e converte o desenho da tela em uma URL PNG codificada em 64 bits
+
+
+			//verifico se minha div 'imagem capturada' está está 'none', se estiver, exibo ela.
+			if(img_capturada.style.display === "none"){
+    			img_capturada.style.display = "block";
+  			}
+
+			img_capturada.setAttribute("src", `${foto}`);
+
+			let enlace = document.createElement('a');
+			enlace.download = 'foto_webcam.png';
+			enlace.href = foto;
+			enlace.click();
+
+			video.play();
+		});
+
+	</script>
+
+</body>
+</html>
