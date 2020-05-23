@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 	<title>Webcam</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body>
 
@@ -97,10 +98,23 @@
 
 			img_capturada.setAttribute("src", `${foto}`);
 
-			let enlace = document.createElement('a');
-			enlace.download = 'foto_webcam.png';
-			enlace.href = foto;
-			enlace.click();
+			$.ajax({ 
+			    type: "POST", 
+			    url: "servidor.php",
+			    dataType: 'text',
+			    data: {
+			    	funcao: "png",
+			        data : foto
+			    }
+			});
+
+			//############################################################
+			//FAZ O DOWNLOAD DA IMAGEM NO CLIENT
+			//############################################################
+			// let enlace = document.createElement('a');
+			// enlace.download = 'foto_webcam.png';
+			// enlace.href = foto;
+			// enlace.click();
 
 			video.play();
 		});
